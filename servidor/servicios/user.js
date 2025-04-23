@@ -1,4 +1,6 @@
 const User = require("../models/usuario");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const registro = async (peticion, respuesta) => {
   try {
@@ -6,13 +8,13 @@ const registro = async (peticion, respuesta) => {
     // console.log(nombreUsuario, email, contraseña);
     if (!nombreUsuario || !email || !contraseña) {
       return respuesta
-        .status(404)
+        .status(400)
         .json({ error: "Debe rellenar todos los campos" });
     }
 
     if (contraseña.length < 6) {
       return respuesta
-        .status(404)
+        .status(400)
         .json({ error: "La contraseña debe tener mínimo 6 caracteres" });
     }
 
@@ -24,10 +26,18 @@ const registro = async (peticion, respuesta) => {
 
     if (checkUser) {
       return respuesta
-        .status(404)
+        .status(400)
         .json({ error: "¡Tu usuario o email ya existen!" });
     } else {
-      const newUser = new User({ nombreUsuario, email, contraseña });
+      const salt = await bcrypt.genSalt(10);
+      const contraseñaHash = await bcrypt.hash(contraseña, salt);
+
+      const newUser = new User({
+        nombreUsuario,
+        email,
+        contraseña: contraseñaHash, // ← Guardamos la encriptada
+      });
+
       await newUser.save();
       return respuesta
         .status(200)
@@ -39,4 +49,50 @@ const registro = async (peticion, respuesta) => {
   }
 };
 
-module.exports = { registro };
+const login = async (peticion, respuesta) => {
+  try {
+    const { email, contraseña } = peticion.body;
+
+    if (!email || !contraseña) {
+      return respuesta
+        .status(400)
+        .json({ error: "Debe rellenar todos los campos" });
+    }
+    const checkUser = await User.findOne({ email });
+    if (!checkUser) {
+      return respuesta.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    // ✅ Comparamos contraseña encriptada con bcrypt
+    const contraseñaValida = await bcrypt.compare(
+      contraseña,
+      checkUser.contraseña
+    );
+    if (!contraseñaValida) {
+      return respuesta.status(401).json({ error: "Contraseña incorrecta" });
+    }
+
+    // ✅ Creamos el token JWT
+    const token = jwt.sign(
+      { id: checkUser._id, email: checkUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    // ✅ Enviamos el token como cookie
+    respuesta.cookie("flowlistUserToken", token, {
+      httpOnly: true,
+      sameSite: "lax", // o "none" si usas HTTPS
+      secure: false, // true si usas HTTPS en producción
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días
+    });
+
+    return respuesta
+      .status(200)
+      .json({ success: "Has iniciado sesión correctamente" });
+  } catch (error) {
+    return respuesta.status(200).json({ error: "Error en el servidor" });
+  }
+};
+
+module.exports = { registro, login };

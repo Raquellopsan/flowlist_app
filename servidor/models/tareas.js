@@ -25,8 +25,8 @@ const tareaSchema = new Schema({
   estado: {
     type: String,
     required: true,
-    enum: ["nuevasTareas", "enProceso", "tareasCompletadas"],
-    default: "nuevasTareas",
+    enum: ["sinComenzar", "enProceso", "completadas"],
+    default: "sinComenzar",
   },
 });
 
