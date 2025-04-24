@@ -4,7 +4,7 @@ const tarea = require("../models/tareas");
 const añadirTarea = async (peticion, respuesta) => {
   try {
     const { titulo, descripcion, prioridad, estado } = peticion.body;
-    const { user } = peticion.user;
+    const { user } = peticion;
     if (!titulo || !descripcion) {
       return respuesta
         .status(400)
@@ -13,13 +13,13 @@ const añadirTarea = async (peticion, respuesta) => {
     if (titulo.length < 6) {
       return respuesta
         .status(400)
-        .json({ error: "El título debe tener mínimo 6 caractere" });
+        .json({ error: "El título debe tener mínimo 6 caracteres" });
     }
 
     if (descripcion.length < 6) {
       return respuesta
         .status(400)
-        .json({ error: "La descripción debe tener mínimo 6 caractere" });
+        .json({ error: "La descripción debe tener mínimo 6 caracteres" });
     }
 
     const nuevaTarea = new tarea({ titulo, descripcion, prioridad, estado });
@@ -28,7 +28,7 @@ const añadirTarea = async (peticion, respuesta) => {
     await user.save();
     return respuesta.status(200).json({ success: "Tarea añadida con éxito" });
   } catch (error) {
-    return respuesta.status(404).json({ error: "error interno del servidor" });
+    return respuesta.status(500).json({ error: "Error interno del servidor" });
   }
 };
 

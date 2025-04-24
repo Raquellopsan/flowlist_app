@@ -95,4 +95,18 @@ const login = async (peticion, respuesta) => {
   }
 };
 
-module.exports = { registro, login };
+const logout = async (peticion, respuesta) => {
+  try {
+    respuesta.clearCookie("flowlistUserToken", {
+      httpOnly: true,
+    });
+    return respuesta
+      .status(200)
+      .json({ message: "Sesión finalizada. ¡Hasta pronto!" });
+  } catch (error) {
+    return respuesta.status(404).json({
+      error: "Error en el servidor",
+    });
+  }
+};
+module.exports = { registro, login, logout };

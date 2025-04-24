@@ -7,7 +7,7 @@ const {
 } = require("../servicios/tarea");
 const router = require("express").Router();
 
-router.post("/añadirTarea", authMiddleware, añadirTarea);
+router.post("/anadirTarea", authMiddleware, añadirTarea);
 router.post("/editarTarea/:id", authMiddleware, editarTarea);
 router.post("/buscarTarea/:id", authMiddleware, buscarTarea);
 router.post("/eliminarTarea/:id", authMiddleware, eliminarTarea);
