@@ -1,6 +1,7 @@
 const User = require("../models/usuario");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const tareas = require("../models/tareas");
 
 const registro = async (peticion, respuesta) => {
   try {
@@ -109,4 +110,36 @@ const logout = async (peticion, respuesta) => {
     });
   }
 };
-module.exports = { registro, login, logout };
+
+const detallesUsuario = async (peticion, respuesta) => {
+  try {
+    const { user } = peticion;
+    const getDetails = await User.findById(user._id)
+      .populate("tareas")
+      .select("-contraseña");
+    if (getDetails) {
+      const todasLasTareas = getDetails.tareas;
+      let sinComenzar = [];
+      let enProceso = [];
+      let completadas = [];
+      todasLasTareas.map((item) => {
+        if (item.status === "sinComenzar") {
+          sinComenzar.push(item);
+        } else if (item.status === "enProceso") {
+          enProceso.push(item);
+        } else {
+          completadas.push(item);
+        }
+      });
+      return respuesta.status(200).json({
+        success: "succes",
+        tareas: [{ sinComenzar }, { enProceso }, { completadas }],
+      });
+    }
+  } catch (error) {
+    return respuesta.status(404).json({
+      error: "Error en el servidor",
+    });
+  }
+};
+module.exports = { registro, login, logout, detallesUsuario };

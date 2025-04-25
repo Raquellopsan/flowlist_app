@@ -20,7 +20,7 @@ const Header = ({ setAñadirTareaDiv }) => {
     }
   };
   return (
-    <div className="flex px-12 py-4 items-center justify-between border-b">
+    <div className="flex px-12 py-4 items-center justify-between  ">
       <div>
         <h1 className="text-2xl text-[#815BCE] font-semibold">Flowlist</h1>
       </div>
