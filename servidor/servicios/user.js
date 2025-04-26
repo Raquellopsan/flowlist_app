@@ -123,17 +123,21 @@ const detallesUsuario = async (peticion, respuesta) => {
       let enProceso = [];
       let completadas = [];
       todasLasTareas.map((item) => {
-        if (item.status === "sinComenzar") {
+        if (item.estado === "sinComenzar") {
           sinComenzar.push(item);
-        } else if (item.status === "enProceso") {
+        } else if (item.estado === "enProceso") {
           enProceso.push(item);
         } else {
           completadas.push(item);
         }
       });
       return respuesta.status(200).json({
-        success: "succes",
-        tareas: [{ sinComenzar }, { enProceso }, { completadas }],
+        success: "success",
+        tareas: {
+          sinComenzar,
+          enProceso,
+          completadas,
+        },
       });
     }
   } catch (error) {

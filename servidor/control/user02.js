@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const authMiddleware = require("../middleware/authMiddleware");
 const {
   registro,
   login,
@@ -9,6 +10,6 @@ const {
 router.post("/registro", registro);
 router.post("/login", login);
 router.post("/logout", logout);
-router.get("/detallesUsuario", detallesUsuario);
+router.get("/detallesUsuario", authMiddleware, detallesUsuario);
 
 module.exports = router;
